@@ -8,6 +8,7 @@ function CameraList({
   setStatus,
   selectedLocation,
   selectedStatus,
+  searchText,
 }) {
   const [data, setData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
@@ -53,6 +54,11 @@ function CameraList({
     const filteredData = getFilteredData(selectedStatus, selectedLocation);
     setDisplayData(filteredData);
   }, [selectedStatus, selectedLocation]);
+
+  useEffect(() => {
+    const filteredData = searchData(searchText);
+    setDisplayData(filteredData);
+  }, [searchText]);
 
   const getFilteredData = (status, location) => {
     let filteredData = [...data];
@@ -109,6 +115,13 @@ function CameraList({
       (item) => item.id !== id
     );
     setDisplayData(getRemainingDisplayData);
+  };
+
+  const searchData = (text) => {
+    const result = data.filter((item) =>
+      item.name.toLowerCase().includes(text)
+    );
+    return result;
   };
 
   return (
