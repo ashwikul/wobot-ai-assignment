@@ -3,7 +3,12 @@ import cloud from "../assets/cloud.svg";
 import device from "../assets/device.svg";
 import actions from "../assets/actions.svg";
 
-function CameraList() {
+function CameraList({
+  setLocations,
+  setStatus,
+  selectedLocation,
+  selectedStatus,
+}) {
   const [data, setData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
   useEffect(() => {
@@ -22,9 +27,47 @@ function CameraList() {
         console.log("Data received:", data);
         setData(data.data);
         setDisplayData(data.data);
+        const getLocations = data.data.reduce((acc, curr) => {
+          if (!acc.includes(curr.location)) {
+            acc.push(curr.location);
+          }
+          return acc; // Return the accumulator
+        }, []);
+
+        // console.log("locations", getLocations);
+        setLocations(getLocations);
+
+        const getStatus = data.data.reduce((acc, curr) => {
+          if (!acc.includes(curr.status)) {
+            acc.push(curr.status);
+          }
+          return acc; // Return the accumulator
+        }, []);
+        // console.log("status", getStatus);
+        setStatus(getStatus);
       })
       .catch((err) => console.log("error", err));
   }, []);
+
+  useEffect(() => {
+    const filteredData = getFilteredData(selectedStatus, selectedLocation);
+    setDisplayData(filteredData);
+  }, [selectedStatus, selectedLocation]);
+
+  const getFilteredData = (status, location) => {
+    let filteredData = [...data];
+
+    if (selectedStatus) {
+      filteredData = filteredData.filter((item) => item.status === status);
+    }
+
+    if (selectedLocation) {
+      filteredData = filteredData.filter((item) => item.location === location);
+    }
+
+    return filteredData;
+  };
+
   const updateData = (id, status) => {
     const url = "https://api-app-staging.wobot.ai/app/v1/update/camera/status";
     const token = "4ApVMIn5sTxeW7GQ5VWeWiy";
@@ -62,7 +105,10 @@ function CameraList() {
   const deleteData = (id) => {
     const getRemainingData = data.filter((item) => item.id !== id);
     setData(getRemainingData);
-    setDisplayData(getRemainingData);
+    const getRemainingDisplayData = displayData.filter(
+      (item) => item.id !== id
+    );
+    setDisplayData(getRemainingDisplayData);
   };
 
   return (
