@@ -198,6 +198,12 @@ color: #545454;
   right: 10px;
   width: 20px;
 }
+.loader-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
 
 .loader {
   width: 50px;
