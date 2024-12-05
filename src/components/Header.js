@@ -1,13 +1,40 @@
 import React from "react";
-import logo from "../assets/logo.svg";
-function Header() {
+import search from "../assets/search.svg";
+function Header({ searchText, setSearchText }) {
+  console.log("searchText", searchText);
+
   return (
     <div className="headers">
       <div className="title">
         <h4>Cameras</h4>
         <p>Manage your cameras here.</p>
       </div>
-      <input className="search" type="text" placeholder="Search"></input>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          position: "relative",
+        }}
+      >
+        <input
+          className="search"
+          type="text"
+          placeholder="search"
+          value={searchText}
+          onChange={(e) => {
+            setSearchText(e.target.value);
+          }}
+        />
+        <img
+          src={search}
+          alt="Search Icon"
+          style={{
+            position: "absolute",
+            right: "10px",
+          }}
+        />
+      </div>
     </div>
   );
 }

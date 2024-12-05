@@ -10,12 +10,13 @@ function App() {
   const [status, setStatus] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [searchText, setSearchText] = useState("");
   return (
     <div className="App">
       <div>
         <img src={logo} />
       </div>
-      <Header />
+      <Header searchText={searchText} setSearchText={setSearchText} />
       <Filters
         locations={locations}
         status={status}
@@ -29,6 +30,7 @@ function App() {
         setStatus={setStatus}
         selectedLocation={selectedLocation}
         selectedStatus={selectedStatus}
+        searchText={searchText}
       />
     </div>
   );
