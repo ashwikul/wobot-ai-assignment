@@ -18,16 +18,14 @@ function CameraList({
   const [displayData, setDisplayData] = useState([]);
   const [pageIndex, setPageIndex] = useState(1);
   const [numberOfPages, setNumberOfPages] = useState(0);
-
   const [items_per_page, setItemsPerPage] = useState(10);
-  // console.log("searchText", searchText);
-
+  const [isLoading, setIsLoading] = useState(false);
   const no_of_records_per_page = [5, 10, 15];
 
   useEffect(() => {
     const url = process.env.REACT_APP_API_URL;
     const token = process.env.REACT_APP_API_TOKEN;
-
+    setIsLoading(true);
     fetch(url, {
       method: "GET",
       headers: {
@@ -35,7 +33,7 @@ function CameraList({
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((response) => response.json()) // Parse the JSON data from the response
+      .then((response) => response.json())
       .then((data) => {
         console.log("Data received:", data);
         setData(data.data);
@@ -45,41 +43,38 @@ function CameraList({
           if (!acc.includes(curr.location)) {
             acc.push(curr.location);
           }
-          return acc; // Return the accumulator
+          return acc;
         }, []);
 
-        // console.log("locations", getLocations);
         setLocations(getLocations);
 
         const getStatus = data.data.reduce((acc, curr) => {
           if (!acc.includes(curr.status)) {
             acc.push(curr.status);
           }
-          return acc; // Return the accumulator
+          return acc;
         }, []);
-        // console.log("status", getStatus);
         setStatus(getStatus);
+        setIsLoading(false);
       })
       .catch((err) => console.log("error", err));
   }, []);
 
   useEffect(() => {
-    const filteredData = getFilteredData(selectedStatus, selectedLocation);
+    const filteredData = getFilteredData(
+      selectedStatus,
+      selectedLocation,
+      searchText
+    );
     console.log("1", displayData);
     setDisplayData(filteredData);
-  }, [selectedStatus, selectedLocation]);
-
-  useEffect(() => {
-    const filteredData = searchData(searchText);
-    console.log("2", displayData);
-    setDisplayData(filteredData);
-  }, [searchText]);
+  }, [selectedStatus, selectedLocation, searchText]);
 
   useEffect(() => {
     setNumberOfPages(Math.ceil(displayData.length / items_per_page));
   }, [displayData]);
 
-  const getFilteredData = (status, location) => {
+  const getFilteredData = (status, location, text) => {
     let filteredData = [...data];
 
     if (selectedStatus) {
@@ -90,6 +85,12 @@ function CameraList({
       filteredData = filteredData.filter((item) => item.location === location);
     }
 
+    if (text) {
+      filteredData = filteredData.filter((item) =>
+        item.name.toLowerCase().includes(text)
+      );
+    }
+    setPageIndex(1);
     return filteredData;
   };
 
@@ -136,225 +137,278 @@ function CameraList({
     setDisplayData(getRemainingDisplayData);
   };
 
-  const searchData = (text) => {
-    const result = data.filter((item) =>
-      item.name.toLowerCase().includes(text)
-    );
-
-    return result;
-  };
-  console.log("displayData", displayData);
   return (
-    <table className="table">
-      <thead>
-        <tr>
-          <th>
-            <input type="checkbox" />
-          </th>
-          <th>NAME</th>
-          <th>HEALTH</th>
-          <th>LOCATION</th>
-          <th>RECORDER</th>
-          <th>TASKS</th>
-          <th>STATUS</th>
-          <th>ACTIONS</th>
-        </tr>
-      </thead>
-      <tbody>
-        {displayData
-          .slice(items_per_page * (pageIndex - 1), items_per_page * pageIndex)
-          .map((item) => {
-            return (
-              <tr key={item.id}>
-                <td>
-                  <input type="checkbox" />
-                </td>
+    <>
+      {isLoading ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "60vh",
+          }}
+        >
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>
+                <input type="checkbox" />
+              </th>
+              <th>NAME</th>
+              <th>HEALTH</th>
+              <th>LOCATION</th>
+              <th>RECORDER</th>
+              <th>TASKS</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          {displayData.length > 0 ? (
+            <tbody>
+              {displayData
+                .slice(
+                  items_per_page * (pageIndex - 1),
+                  items_per_page * pageIndex
+                )
+                .map((item) => {
+                  return (
+                    <tr key={item.id}>
+                      <td>
+                        <input type="checkbox" />
+                      </td>
 
-                <td>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <div
-                      className={item.current_status.toLowerCase()}
-                      style={{
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "5px",
-                      }}
-                    ></div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "3px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: "Inter",
-                          fontSize: "14px",
-                          fontWeight: "400",
-                          lineHeight: " 16.94px",
-                        }}
-                      >
-                        {item.name}
-                      </div>
-                      <div
-                        style={{
-                          fontFamily: "Inter",
-                          fontSize: "12px",
-                          fontWeight: 400,
-                          lineHeight: "14.52px",
-                        }}
-                      >
-                        {item.location}
-                      </div>
-                    </div>
-                  </div>
-                </td>
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "5px",
+                            alignItems: "baseline",
+                          }}
+                        >
+                          <div
+                            className={item.current_status.toLowerCase()}
+                            style={{
+                              width: "10px",
+                              height: "10px",
+                              borderRadius: "5px",
+                            }}
+                          ></div>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "3px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontFamily: "Inter",
+                                fontSize: "14px",
+                                fontWeight: "400",
+                                lineHeight: " 16.94px",
+                              }}
+                            >
+                              {item.name}
+                            </div>
+                            <div
+                              style={{
+                                fontFamily: "Inter",
+                                fontSize: "12px",
+                                fontWeight: 400,
+                                lineHeight: "14.52px",
+                              }}
+                            >
+                              {item.location}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
 
-                <td>
-                  <div
-                    style={{
-                      display: "flex",
-                      textAlign: "left",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img src={cloud} />
-                      <p>{item.health.cloud}</p>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img src={device} />
-                      <p>{item.health.device}</p>
-                    </div>
-                  </div>
-                </td>
-                <td>{item.location}</td>
-                <td>{item.recorder || "N/A"}</td>
-                <td>{item.tasks} Tasks</td>
-                <td>
-                  <button
-                    className={item.status.toLowerCase()}
-                    onClick={() => updateData(item.id, item.status)}
-                  >
-                    {item.status}
-                  </button>
-                </td>
-                <td>
-                  <div
-                    style={{ cursor: "pointer" }}
-                    onClick={() => deleteData(item.id)}
-                  >
-                    <img src={actions} />
-                  </div>
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            textAlign: "left",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <img src={cloud} />
+                            <p>{item.health.cloud}</p>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <img src={device} />
+                            <p>{item.health.device}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{item.location}</td>
+                      <td>{item.recorder || "N/A"}</td>
+                      <td>{item.tasks} Tasks</td>
+                      <td>
+                        <button
+                          className={item.status.toLowerCase()}
+                          onClick={() => updateData(item.id, item.status)}
+                        >
+                          {item.status}
+                        </button>
+                      </td>
+                      <td>
+                        <div
+                          style={{ cursor: "pointer" }}
+                          onClick={() => deleteData(item.id)}
+                        >
+                          <img src={actions} />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          ) : (
+            <tbody>
+              <tr>
+                <td colSpan="8" style={{ textAlign: "center" }}>
+                  No matching records found
                 </td>
               </tr>
-            );
-          })}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colSpan="8">
-            <div
-              style={{
-                display: "flex",
-                gap: "20px",
-                justifyContent: "flex-end",
-              }}
-            >
-              <select
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                value={items_per_page}
-                style={{
-                  border: "none",
-                  color: "#545454",
-                }}
-              >
-                {no_of_records_per_page.map((n, index) => (
-                  <option value={n} key={index}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <div
-                style={{
-                  fontFamily: "Inter",
-                  fontSize: "12px",
-                  fontWeight: "400",
-                  lineHeight: "14.52px",
-                  textAlign: "left",
-                  color: "#545454",
-                }}
-              >
-                {items_per_page * (pageIndex - 1) + 1}-{" "}
-                {items_per_page * (pageIndex - 1) + 1 + (items_per_page - 1)} of{" "}
-                {displayData.length}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                }}
-              >
-                <img
-                  src={leftArrow2}
-                  onClick={() => setPageIndex(1)}
-                  width={11}
-                  height={12}
+            </tbody>
+          )}
+
+          <tfoot>
+            <tr>
+              <td colSpan="8">
+                <div
                   style={{
-                    cursor: "pointer",
+                    display: "flex",
+                    gap: "20px",
+                    justifyContent: "flex-end",
                   }}
-                />
-                <img
-                  src={leftArrow}
-                  width={7}
-                  height={12}
-                  onClick={() => setPageIndex((prev) => prev - 1)}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                />
-                <img
-                  src={rightArrow}
-                  onClick={() => setPageIndex((prev) => prev + 1)}
-                  width={7}
-                  height={12}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                />
-                <img
-                  src={rightArrow2}
-                  onClick={() => setPageIndex(numberOfPages)}
-                  width={11}
-                  height={12}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
+                >
+                  <select
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    value={items_per_page}
+                    style={{
+                      border: "none",
+                      color: "#545454",
+                    }}
+                  >
+                    {no_of_records_per_page.map((n, index) => (
+                      <option value={n} key={index}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                  <div
+                    style={{
+                      fontFamily: "Inter",
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      lineHeight: "14.52px",
+                      textAlign: "left",
+                      color: "#545454",
+                    }}
+                  >
+                    {items_per_page * (pageIndex - 1) + 1}-
+                    {Math.min(items_per_page * pageIndex, displayData.length)}{" "}
+                    of {displayData.length}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                    }}
+                  >
+                    <button
+                      disabled={pageIndex === 1}
+                      style={{
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: pageIndex === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <img
+                        src={leftArrow2}
+                        onClick={() => setPageIndex(1)}
+                        width={11}
+                        height={12}
+                      />
+                    </button>
+
+                    <button
+                      disabled={pageIndex === 1}
+                      style={{
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: pageIndex === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <img
+                        dis
+                        src={leftArrow}
+                        width={7}
+                        height={12}
+                        onClick={() => setPageIndex((prev) => prev - 1)}
+                      />
+                    </button>
+                    <button
+                      disabled={pageIndex === numberOfPages}
+                      style={{
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor:
+                          pageIndex === numberOfPages
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
+                    >
+                      <img
+                        src={rightArrow}
+                        onClick={() => setPageIndex((prev) => prev + 1)}
+                        width={7}
+                        height={12}
+                      />
+                    </button>
+                    <button
+                      disabled={pageIndex === numberOfPages}
+                      style={{
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor:
+                          pageIndex === numberOfPages
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
+                    >
+                      <img
+                        src={rightArrow2}
+                        onClick={() => setPageIndex(numberOfPages)}
+                        width={11}
+                        height={12}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      )}
+    </>
   );
 }
 
