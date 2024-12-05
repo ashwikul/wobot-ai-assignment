@@ -59,7 +59,12 @@ function CameraList() {
       })
       .catch((err) => console.log("error", err));
   };
-  const deleteData = (id, status) => {};
+  const deleteData = (id) => {
+    const getRemainingData = data.filter((item) => item.id !== id);
+    setData(getRemainingData);
+    setDisplayData(getRemainingData);
+  };
+
   return (
     <table className="table">
       <thead>
@@ -162,7 +167,7 @@ function CameraList() {
               <td>
                 <div
                   style={{ cursor: "pointer" }}
-                  onClick={() => deleteData(item.id, item.status)}
+                  onClick={() => deleteData(item.id)}
                 >
                   <img src={actions} />
                 </div>
