@@ -25,7 +25,40 @@ function CameraList() {
       })
       .catch((err) => console.log("error", err));
   }, []);
-  const updateData = (id, status) => {};
+  const updateData = (id, status) => {
+    const url = "https://api-app-staging.wobot.ai/app/v1/update/camera/status";
+    const token = "4ApVMIn5sTxeW7GQ5VWeWiy";
+
+    const payload = {
+      id: id,
+      status: status == "Active" ? "Inactive" : "Active",
+    };
+
+    fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => response.json()) // Parse the JSON data from the response
+      .then((data) => {
+        console.log("Data updated:", data);
+
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, status: data.data.status } : item
+          )
+        );
+        setDisplayData((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, status: data.data.status } : item
+          )
+        );
+      })
+      .catch((err) => console.log("error", err));
+  };
   const deleteData = (id, status) => {};
   return (
     <table className="table">
