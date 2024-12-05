@@ -10,6 +10,7 @@ function Header({ searchText, setSearchText }) {
         <p>Manage your cameras here.</p>
       </div>
       <div
+        className="search-container"
         style={{
           display: "flex",
           alignItems: "center",
@@ -26,14 +27,7 @@ function Header({ searchText, setSearchText }) {
             setSearchText(e.target.value);
           }}
         />
-        <img
-          src={search}
-          alt="Search Icon"
-          style={{
-            position: "absolute",
-            right: "10px",
-          }}
-        />
+        <img src={search} alt="Search Icon" />
       </div>
     </div>
   );
