@@ -3,7 +3,6 @@
   padding: 24px;
   background-color: #F9F9F9;
   font-family: Inter;
-  ;
 }
 
 .headers{
@@ -159,9 +158,6 @@ background-color: #DC3545;
   height: 32px;
   padding: 4px 8px 4px 8px;
   gap: 0px;
-  /* border-bottom: 1px solid #CED4DA; */
-  /* border-radius: 4px; */
-  /* border: 1px 0px 0px 0px; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -192,6 +188,25 @@ line-height: 16.41px;
 color: #545454;
 }
 
+.search-container img {
+  position: absolute;
+  right: 10px;
+  width: 20px;
+}
 
 
+/* Smaller screens (tablet) */
+@media (max-width: 768px) {
+  .headers{
+    flex-direction: column;
+    gap: 6px;
+  }
 
+  .search-container img {
+    left: 220px;
+  }
+
+  .App{
+    width: fit-content;
+  }
+}
